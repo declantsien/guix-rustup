@@ -1,0 +1,7 @@
+;; -*- mode: scheme; -*-
+
+(authorizations
+ (version 0)               ;current file format version
+
+ (("F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5"
+   (name "declantsien"))))
