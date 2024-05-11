@@ -17,6 +17,7 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (rustup build toolchain)
+  #:use-module (guix ui)
   #:use-module (rnrs enums)
   #:use-module (guix http-client)
   #:use-module (web uri)
@@ -111,9 +112,9 @@
                       (default #f)))
 
 (define* (toolchain->new channel-str
-			 #:optional
+			 #:key
 			 (components (list ))
-			 (triplets (list ))
+			 (targets (list ))
 			 (profile 'default))
   (define _ (channel-str? channel-str))
   (toolchain-profile? profile)
@@ -122,11 +123,11 @@
             (G_ "components should be a list, was given: ~a")
             components)))
   (for-each %toolchain-components? components)
-  (unless (list? triplets)
+  (unless (list? targets)
     (raise (formatted-message
             (G_ "targets should be a list, was given: ~a")
-            triplets)))
-  (for-each %rustc-target-triplets? triplets)
+            targets)))
+  (for-each %rustc-target-triplets? targets)
   (define alias (find (lambda (alias)
                         (string= (channel-str-normalize channel-str) (symbol->string (car alias))))
                       (module-ref (resolve-module '(rustup dist)) 'aliases)))
@@ -180,7 +181,7 @@
               channel-str
               (map %rustc-target-triplets->get available-cross-triplets)
               triplet))))
-  (for-each cross-target-available? triplets)
+  (for-each cross-target-available? targets)
 
   (define profile-components
     (case profile
@@ -215,7 +216,7 @@
   (define cross-sources (filter
            (lambda (target)
              (member (car target)
-                     (map %rustc-target-triplets->position triplets)))
+                     (map %rustc-target-triplets->position targets)))
            available-cross-targets))
 
   (define all-sources (delete-duplicates
@@ -245,7 +246,7 @@
 
   `(,version . ,hashed-binary-urls))
 
-(define* (toolchain->from-file file)
+(define* (parse-rust-toolchain-file file)
   (let* ((content (call-with-input-file file get-string-all))
 	 (toml (catch #t
                  (lambda () (parse-toml content))
@@ -263,8 +264,11 @@
 	       (profile (recursive-assoc-ref
 			 toml
 			 `("toolchain" "profile"))))
-	  (toolchain->new channel components targets profile))
-	(toolchain->new (string-trim-right content #\newline)))))
+	  (list channel
+                #:components components
+                #:targets targets
+                #:profile profile))
+	(list (string-trim-right content #\newline)))))
 
 (define* (toolchain->version t)
   (let ((manifest (toolchain->manifest t)))
@@ -276,25 +280,28 @@
 	      #\ ))
         (toolchain->channel t))))
 
-(define* (rustup channel
+(define* (rustup #:optional (channel-or-toolchain-file #f)
 		 #:key
 		 (components (list ))
 		 (targets (list ))
 		 (profile 'default))
+  (let ((args (match (and channel-or-toolchain-file (basename channel-or-toolchain-file))
+                ((or "rust-toolchain" "rust-toolchain.toml" #f)
+                 (args-from-default-toolchain-file channel-or-toolchain-file))
+                (_ (list channel-or-toolchain-file
+                         #:components components
+                         #:targets targets
+                         #:profile profile)))))
+    (display args)
+    (make-rust-bin (apply toolchain->new args))))
 
-  (let* ((t (toolchain->new channel components targets profile))
-         (version (car t))
-	 (sources (cdr t))
-	 (source (car sources))
-	 (other-sources (cdr sources)))
+(define* (make-rust-bin aggregated)
+  (let ((version (car aggregated))
+	(sources (cdr aggregated)))
     (package
       (name "rust-bin")
       (version version)
-      (source (origin
-		(method url-fetch)
-		(uri (car source))
-		(sha256
-		 (base32 (cdr source)))))
+      (source #f)
       (build-system binary-build-system)
       (inputs
        (append
@@ -307,7 +314,7 @@
 		  (uri (car source))
 		  (sha256
 		   (base32 (cdr source))))))
-	 other-sources)))
+	 sources)))
       (native-inputs (list `(,gcc "lib")))
       (arguments
        (list
@@ -315,7 +322,7 @@
 	#:validate-runpath? #f
 	#:phases
 	#~(modify-phases %standard-phases
-	    (add-after 'unpack 'copy-dist
+	    (replace 'unpack
               (lambda* (#:key inputs #:allow-other-keys)
 		(for-each
 		 (lambda (input)
@@ -394,17 +401,33 @@ safety and thread safety guarantees.")
       (license (list license:asl2.0 license:expat)))
     ))
 
-(define* (rust-from-toolchain channel
-			      #:optional
-			      (components (list ))
-			      (targets (list ))
-			      (profile "default"))
-  (let ((toolchain (toolchain->new channel components targets profile)))
-    (rustup toolchain)))
+;; Copied (guix scripts shell)
+(define (find-file-in-parent-directories candidates)
+  "Find one of CANDIDATES in the current directory or one of its ancestors."
+  (define start (getcwd))
+  (define device (stat:dev (stat start)))
 
-(define* (rust-from-toolchain-file file)
-  (let ((toolchain (toolchain->from-file file)))
-    (rustup toolchain)))
+  (let loop ((directory start))
+    (let ((stat (stat directory)))
+      (and (= (stat:uid stat) (getuid))
+           (= (stat:dev stat) device)
+           (or (any (lambda (candidate)
+                      (let ((candidate (string-append directory "/" candidate)))
+                        (and (file-exists? candidate) candidate)))
+                    candidates)
+               (and (not (string=? directory "/"))
+                    (loop (dirname directory)))))))) ;lexical ".." resolution
+
+(define* (args-from-default-toolchain-file #:optional (file #f))
+  (let ((file (or file (find-file-in-parent-directories '("rust-toolchain.toml" "rust-toolchain")))))
+    (match file
+      (#f
+       (warning (G_ "no toolchain specified; using stable channel~%"))
+       (list "stable"))
+      (file
+       (begin
+         (info (G_ "loading toolchain from '~a'...~%") file)
+         (parse-rust-toolchain-file file))))))
 
 (define* (select-latest-nightly-with file)
   ;; Select the latest nightly toolchain which have specific components or profile available.This helps nightly users in case of latest nightly may not contains all components they want.

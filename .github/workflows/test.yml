@@ -1,0 +1,47 @@
+name: test
+on: [push]
+jobs:
+  build-with-channels:
+    name: Test as Guix channel
+    runs-on: ubuntu-latest
+    strategy:
+      # building independent packages, don’t abort entire build if one fails
+      fail-fast: false
+    steps:
+      - name: Guix cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/guix
+          # use a key that (almost) never matches
+          key: guix-cache-${{ github.sha }}
+          restore-keys: |
+            guix-cache-
+      # Cannot use a cache for /gnu/store, since restore fails
+      - name: Install Guix
+        id: install-guix
+        uses: PromyLOPh/guix-install-action@v1
+        with:
+          channels: |-
+            (list (channel
+                   (name 'guix)
+                   (url "https://github.com/declantsien/guix")
+                   (branch "master")
+                   (introduction
+                    (make-channel-introduction
+                     "9edb3f66fd807b096b48283debdcddccfea34bad"
+                     (openpgp-fingerprint
+                      "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+                  (channel
+                   (name 'rustup)
+                   (url "https://github.com/declantsien/guix-rustup")
+                   (introduction
+                    (make-channel-introduction
+                     "325d3e2859d482c16da21eb07f2c6ff9c6c72a80"
+                     (openpgp-fingerprint
+                      "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
+      - name: Build
+        run: guix build rust-bin
+      - name: Build
+        run: guix build -e '((@@ (rustup build toolchain) rustup) "1.78.0")'
+      - name: Build
+        run: guix build -e '((@@ (rustup build toolchain) rustup) "nightly-2024-05-13")'

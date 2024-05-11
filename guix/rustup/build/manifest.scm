@@ -493,24 +493,18 @@
   (define channel-hash-file-hash
     (let* ((content (http-fetch/guarded sha256-url)))
       (if content
-          (base32-from-sha256 (car (string-split
-  	                            content
-	                            #\ )))
+          (car (string-split
+  	        content
+	        #\ ))
           (begin
             (format #t "Failed to download manifest sha256 ~a ~a~%" sha256-url str)
             #f))))
-  (if channel-hash-file-hash
-      (let* ((%store    (open-connection))
-             (drv      (url-fetch* %store url 'sha256 (nix-base32-string->bytevector channel-hash-file-hash)))
-             (out-path (derivation->output-path drv)))
-        (and (build-derivations %store (list drv))
-             (file-exists? out-path)
-             (valid-path? %store out-path)
-             (call-with-input-file out-path
-	       (lambda (port)
-	         (let* ((content (get-string-all port)))
-	           (parse-toml content))))))
-      #f))
+  (let* ((content (http-fetch/guarded url channel-hash-file-hash)))
+    (if content
+        (parse-toml content)
+        (begin
+          (format #t "Failed to download manifest toml ~a ~a~%" url str)
+          #f))))
 
 (define* (compact-manifest str #:optional manifest)
   (define c (channel->from-str str))
@@ -581,7 +575,7 @@
          component-hashed-binaries
          components)))
 
-  (let* ((manifest (or manifest (download-channel-manifest str))))
+  (let* ((manifest (or manifest (download-manifest str))))
     (compact-manifest manifest)))
 
 (define* (validate-url-pattern component-name-index triplet-index compression-kind-index hash uri-triplet-index channel-name date url)

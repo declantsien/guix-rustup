@@ -1,0 +1,30 @@
+#+TITLE: Guix Rustup
+#+OPTIONS: d:nil
+#+EXPORT_FILE_NAME: guix-rustup.texi
+#+TEXINFO_DIR_CATEGORY: Guix Channels
+#+TEXINFO_DIR_TITLE: Guix Rustup: (guix-rustup).
+#+TEXINFO_DIR_DESC: Rust binary toolchain channel for Guix
+
+https://forge.rust-lang.org/infra/channel-layout.html
+https://forge.rust-lang.org/infra/other-installation-methods.html
+
+* Overview
+
+Guix Rustup
+
+** Channel introduction
+In case you want to use this channel, add the following code to
+your ~~/.config/guix/channels.scm~, and call ~guix pull~.
+#+begin_src scheme
+  (cons*
+   (channel
+    (name 'rustup)
+    (url "https://github.com/declantsien/guix-rustup")
+    (introduction
+     (make-channel-introduction
+      "325d3e2859d482c16da21eb07f2c6ff9c6c72a80"
+      (openpgp-fingerprint
+       "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5"))))
+   %default-channels)
+#+end_src
+
