@@ -1,0 +1,5 @@
+[toolchain]
+channel = "nightly-2024-01-25"
+components = [ "rustfmt", "rustc-dev", "rust-analyzer" ]
+targets = [ "wasm32-unknown-unknown", "thumbv2-none-eabi" ]
+profile = "minimal"

@@ -1,0 +1,16 @@
+root = true
+
+[*.{c,h,cpp,hpp,el,scm,ac,am,m4,po}{,.in}]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{c,h,cpp,hpp,ac,am,m4,el,scm}{,.in}]
+max_line_length = 85
+
+[*.{c,h,cpp,hpp,ac,m4,el,scm}{,.in}]
+indent_style = space
+
+[*.{c,h,cpp,hpp}{,.in}]
+indent_size = 4
