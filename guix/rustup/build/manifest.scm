@@ -509,7 +509,9 @@
 (define* (compact-manifest str #:optional manifest)
   (define c (channel->from-str str))
   (define channel (channel->name c))
-  (define date (channel->date c))
+  (define date (or (channel->date c) (recursive-assoc-ref
+			 manifest
+			 `("date"))))
   (define* (compact-manifest data)
     (define toolchain-version
       (car (string-split

@@ -28,3 +28,44 @@ your ~~/.config/guix/channels.scm~, and call ~guix pull~.
    %default-channels)
 #+end_src
 
+** Usage
+
+*** For stable Rusts
+#+begin_src shell
+  guix search rust-bin
+#+end_src
+
+*** For latest nightly/beta
+#+begin_src
+  guix build -e '((@@ (rustup build toolchain) rustup) "stable")'
+  guix build -e '((@@ (rustup build toolchain) rustup) "beta")'
+  guix build -e '((@@ (rustup build toolchain) rustup) "nightly")'
+#+end_src
+
+*** With =guix shell= =manifest.scm=
+
+#+begin_src scheme
+  (use-modules (rustup build toolchain))
+
+  ;; (packages->manifest (list (rustup "nightly-2024-05-18")))
+
+  (packages->manifest (list (rustup)))
+#+end_src
+
+*** Rustup toolchain file
+=rustup-toolchain=
+=rustup-toolchain.toml=
+
+Procedure =rustup= will search for these two file in parent folders like
+=guix shell= search for =mainfest.scm= file. You can manully specify the
+location of the toolchain file with =(rustup "path/to/rust-toolchain")=
+
+*** =rustup= arguments
+#+begin_src scheme
+    (define* (rustup #:optional (channel-or-toolchain-file #f)
+		   #:key
+		   (components (list ))
+		   (targets (list ))
+		   (profile 'default))
+      ...)
+#+end_src

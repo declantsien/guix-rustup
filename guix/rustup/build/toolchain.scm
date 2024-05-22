@@ -139,9 +139,11 @@
                    aliased-str))
   (define _channel-name (channel->name channel))
   (define _channel-date (channel->date channel))
-  (define _var (module-variable
-                (resolve-module `(rustup dist ,(string->symbol _channel-date)))
-                (string->symbol (channel-str-normalize _channel-name))))
+  (define _var (if _channel-date
+                   (module-variable
+                    (resolve-module `(rustup dist ,(string->symbol _channel-date)))
+                    (string->symbol (channel-str-normalize _channel-name)))
+                   #f))
   (define _data (cond (_var
                        (variable-ref _var))
                       (else
