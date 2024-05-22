@@ -292,7 +292,6 @@
                          #:components components
                          #:targets targets
                          #:profile profile)))))
-    (display args)
     (make-rust-bin (apply toolchain->new args))))
 
 (define* (make-rust-bin aggregated)
