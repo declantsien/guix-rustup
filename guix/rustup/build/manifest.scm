@@ -372,10 +372,12 @@
      )))
 
 (define (%rustc-target-triplets? triplet)
-  (unless (enum-set-member? triplet %rustc-target-triplets)
+  (unless (enum-set-member?
+           (string->symbol (format #f "~a" triplet))
+           %rustc-target-triplets)
     (raise (formatted-message
             (G_ "Toolchain triplet must be one of ~a, was given: ~a")
-            (list->human-readable-list (enum-set->list %rustc-target-triplets?))
+            (list->human-readable-list (enum-set->list %rustc-target-triplets))
             triplet))))
 
 (define* (%rustc-target-triplets->position key)
@@ -415,7 +417,9 @@
      lldb)))
 
 (define (%toolchain-components? component)
-  (unless (enum-set-member? component %toolchain-components)
+  (unless (enum-set-member?
+           (string->symbol (format #f "~a" component))
+           %toolchain-components)
     (raise (formatted-message
             (G_ "Toolchain component must be one of ~a, was given: ~a")
             (list->human-readable-list (enum-set->list %toolchain-components))
@@ -447,7 +451,7 @@
   (regexp-exec %channel-rx (channel-str-normalize str)))
 
 (define (channel-str? channel-str)
-  (let ((match (channel-str-match channel-str)))
+  (let ((match (channel-str-match (format #f "~a" channel-str))))
     (if (not match)
         (raise (formatted-message
                 (G_ "Failed to match toolchain channel spec ~a, was given: ~a")

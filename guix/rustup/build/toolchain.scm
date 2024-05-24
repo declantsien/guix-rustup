@@ -17,7 +17,6 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (rustup build toolchain)
-  #:use-module (guix ui)
   #:use-module (rnrs enums)
   #:use-module (guix http-client)
   #:use-module (web uri)
@@ -26,7 +25,8 @@
   #:use-module (guix i18n)
   #:use-module ((guix build utils) #:select (find-files symbolic-link?))
   #:use-module ((gnu home services utils) #:select (list->human-readable-list))
-  #:use-module ((guix diagnostics) #:select (formatted-message))
+  #:use-module ((guix diagnostics) #:select
+                (formatted-message warning info report-error info leave))
   ;; #:use-module (guix build utils)
   #:use-module (ice-9 textual-ports)
   #:use-module (rustup build utils)
@@ -64,7 +64,9 @@
                               complete)))
 
 (define (toolchain-profile? profile)
-  (unless (enum-set-member? profile %toolchain-profiles)
+  (unless (enum-set-member?
+           (string->symbol (format #f "~a" profile))
+           %toolchain-profiles)
     (raise (formatted-message
             (G_ "Toolchain profile must be one of ~a, was given: ~a")
             (list->human-readable-list (enum-set->list %toolchain-profiles))
@@ -186,7 +188,7 @@
   (for-each cross-target-available? targets)
 
   (define profile-components
-    (case profile
+    (case (string->symbol (format #f "~a" profile))
       ((default)
        (map %toolchain-components->position %default-profile))
       ((minimal)
@@ -289,7 +291,11 @@
 		 (profile 'default))
   (let ((args (match (and channel-or-toolchain-file (basename channel-or-toolchain-file))
                 ((or "rust-toolchain" "rust-toolchain.toml" #f)
-                 (args-from-default-toolchain-file channel-or-toolchain-file))
+                 (args-from-default-toolchain-file
+                  channel-or-toolchain-file
+                  #:components components
+                  #:targets targets
+                  #:profile profile))
                 (_ (list channel-or-toolchain-file
                          #:components components
                          #:targets targets
@@ -419,15 +425,23 @@ safety and thread safety guarantees.")
                (and (not (string=? directory "/"))
                     (loop (dirname directory)))))))) ;lexical ".." resolution
 
-(define* (args-from-default-toolchain-file #:optional (file #f))
+(define* (args-from-default-toolchain-file
+          #:optional (file #f)
+          #:key
+	  (components (list ))
+	  (targets (list ))
+	  (profile 'default))
   (let ((file (or file (find-file-in-parent-directories '("rust-toolchain.toml" "rust-toolchain")))))
     (match file
       (#f
        (warning (G_ "no toolchain specified; using stable channel~%"))
-       (list "stable"))
+       (list "stable"
+             #:components components
+             #:targets targets
+             #:profile profile))
       (file
        (begin
-         (info (G_ "loading toolchain from '~a'...~%") file)
+         (info (G_ "Loading Rust toolchain from '~a'...~%") file)
          (parse-rust-toolchain-file file))))))
 
 (define* (select-latest-nightly-with file)
