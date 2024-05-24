@@ -28,7 +28,8 @@
   #:use-module (guix build utils)
   #:use-module (guix derivations)
   #:use-module ((gnu home services utils) #:select (list->human-readable-list))
-  #:use-module ((guix diagnostics) #:select (formatted-message))
+  #:use-module ((guix diagnostics) #:select
+                (formatted-message warning info report-error info leave))
   #:use-module (rustup build toml)
   #:use-module (rustup build utils)
   #:use-module (srfi srfi-26)
@@ -494,6 +495,7 @@
     (format #f "~a.toml" url-v1))
   (define sha256-url (format #f "~a.sha256" url))
 
+  (info (G_ "Downloading channel manifest checksum from '~a'...~%") sha256-url)
   (define channel-hash-file-hash
     (let* ((content (http-fetch/guarded sha256-url)))
       (if content
@@ -503,6 +505,7 @@
           (begin
             (format #t "Failed to download manifest sha256 ~a ~a~%" sha256-url str)
             #f))))
+  (info (G_ "Downloading channel manifest from '~a'...~%") url)
   (let* ((content (http-fetch/guarded url channel-hash-file-hash)))
     (if content
         (parse-toml content)
@@ -516,6 +519,7 @@
   (define date (or (channel->date c) (recursive-assoc-ref
 			 manifest
 			 `("date"))))
+  (info (G_ "Aggregating Rust toolchain component sources...~%"))
   (define* (compact-manifest data)
     (define toolchain-version
       (car (string-split
