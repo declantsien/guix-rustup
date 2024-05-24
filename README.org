@@ -69,3 +69,9 @@ location of the toolchain file with =(rustup "path/to/rust-toolchain")=
 		   (profile 'default))
       ...)
 #+end_src
+
+** Using rustup dist server mirror
+#+begin_src shell
+  export RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
+#+end_src
+
