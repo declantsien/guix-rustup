@@ -211,7 +211,11 @@
              (targets (cdr binary))
              (host-target
               (find (lambda (target)
-                      (equal? (car target) host-triplet)) (cdr binary))))
+                      (member
+                       (car target)
+                       (list (%rustc-target-triplets->position 'all)
+                             host-triplet))) (cdr binary))))
+
          (and (member (car binary) aggregated-components)
               host-target
               `(,component-name-index ,@host-target))))
