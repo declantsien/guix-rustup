@@ -304,13 +304,13 @@
                          #:components components
                          #:targets targets
                          #:profile profile)))))
-    (make-rust-bin (apply toolchain->new args))))
+    (make-rust-toolchain (apply toolchain->new args))))
 
-(define* (make-rust-bin aggregated)
+(define* (make-rust-toolchain aggregated)
   (let ((version (car aggregated))
 	(sources (cdr aggregated)))
     (package
-      (name "rust-bin")
+      (name "rust-toolchain")
       (version version)
       (source #f)
       (build-system binary-build-system)
