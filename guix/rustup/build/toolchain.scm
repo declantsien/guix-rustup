@@ -22,6 +22,8 @@
   #:use-module (web uri)
   #:use-module (guix utils)
   #:use-module (guix records)
+  #:use-module (guix build-system)
+  #:use-module (guix build-system cargo)
   #:use-module (guix i18n)
   #:use-module ((guix build utils) #:select (find-files symbolic-link?))
   #:use-module ((gnu home services utils) #:select (list->human-readable-list))
@@ -51,6 +53,7 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages gcc)
   #:export (rustup
+            make-cargo-build-system
             toolchain->new
             toolchain->from-file
             toolchain->source
@@ -447,6 +450,34 @@ safety and thread safety guarantees.")
        (begin
          (info (G_ "Loading Rust toolchain from '~a'...~%") file)
          (parse-rust-toolchain-file file))))))
+
+(define* (make-cargo-build-system . toolchain-spec)
+  "Return a variant of Cargo BS, a build system, that uses TOOLCHAIN spec
+instead of the default rust toolchain. TOOLCHAIN-SPEC are directly passed
+to procedure rustup"
+  (define toolchain (apply rustup toolchain-spec))
+
+  (define lower
+    (build-system-lower cargo-build-system))
+
+  (define toolchain-packages
+    ;; These are the GNU toolchain packages pulled in by CARGO-BUILD-SYSTEM and
+    ;; all the build systems that inherit from it.
+    '("rustc" "cargo" "rust-toolchain"))
+
+  (define (lower* . args)
+    (let ((lowered (apply lower args)))
+      (bag
+        (inherit lowered)
+        (build-inputs
+         (append (fold alist-delete
+                       (bag-build-inputs lowered)
+                       toolchain-packages)
+                 (list `("rust-toolchain" ,toolchain)))))))
+
+  (build-system
+    (inherit cargo-build-system)
+    (lower lower*)))
 
 (define* (select-latest-nightly-with file)
   ;; Select the latest nightly toolchain which have specific components or profile available.This helps nightly users in case of latest nightly may not contains all components they want.
