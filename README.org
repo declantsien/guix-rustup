@@ -70,6 +70,19 @@ location of the toolchain file with =(rustup "path/to/rust-toolchain")=
       ...)
 #+end_src
 
+*** =cargo-build-system=
+
+Procedure =make-cargo-build-system= takes the same arguments(toolchain spec)
+as =rustup=.  Which will replace the default rustc/cargo with =rust-toolchain=
+requested by =toolchain spec=
+
+#+begin_src
+  (package
+    (name "rust-*")
+    (build-system (make-cargo-build-system "nightly-2024-01-25"))
+    ...)
+#+end_src
+
 ** Using rustup dist server mirror
 #+begin_src shell
   export RUSTUP_DIST_SERVER="https://mirrors.ustc.edu.cn/rust-static"
