@@ -17,6 +17,7 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (rustup build manifest)
+  #:use-module (rustup packages)
   #:use-module (rnrs enums)
   #:use-module (guix records)
   #:use-module (guix base32)
@@ -45,6 +46,7 @@
             download-manifest
             compact-manifest
             download-and-compact-manifest
+            write-manifest
             %rustc-target-triplets?
             %toolchain-components
             %toolchain-components?
@@ -475,8 +477,10 @@
 (define* (download-and-compact-manifest str)
   (let ((manifest (download-manifest str)))
     (if manifest
-        (compact-manifest str manifest)
-      #f)))
+        (let ((compacted (compact-manifest str manifest)))
+          (write-manifest compacted (manifests-directory-cache-directory))
+          compacted)
+        #f)))
 
 (define* (download-manifest str)
   (define c (channel->from-str str))
@@ -623,3 +627,45 @@
 
          )
     `(,url . ,hash)))
+
+(define* (write-manifest data manifests-dir
+                         #:optional (no-update-default-channel #t))
+  (define (channel version)
+    (cond ((string-contains version "beta")
+           "beta")
+          ((string-contains version "nightly")
+           "nightly")
+          (else
+           "stable")))
+
+  (let* ((version (car data))
+         (date (cadr data))
+         (channel (channel version))
+         (filename (format #f "~a~a-~a" manifests-dir channel date)))
+    (call-with-output-file filename
+      (lambda (port)
+        (write data port)))
+    (unless (string= channel "nightly")
+      (call-with-port
+          (open manifests-dir O_RDONLY)
+        (lambda (port)
+          (when (file-exists? (format #f "~a/~a" manifests-dir version))
+            (delete-file-at port version))
+          (symlinkat port (basename filename) version)
+          ;; (readlink version)
+          )))
+    (unless no-update-default-channel
+      (call-with-port
+          (open manifests-dir O_RDONLY)
+        (lambda (port)
+          (when (file-exists? (format #f "~a/~a" manifests-dir channel))
+            (delete-file-at port channel))
+          (symlinkat port (basename filename) channel)
+          ;; (readlink version)
+          )))
+    ;; (info (G_ "no update default channel '~a'...~%") no-update-default-channel)
+    ;; (info (G_ "version '~a'...~%") version)
+    ;; (info (G_ "date '~a'...~%") date)
+    ;; (info (G_ "filename '~a'...~%") filename)
+    )
+  )
