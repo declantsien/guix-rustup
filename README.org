@@ -5,8 +5,8 @@
 #+TEXINFO_DIR_TITLE: Guix Rustup: (guix-rustup).
 #+TEXINFO_DIR_DESC: Rust binary toolchain channel for Guix
 
-https://forge.rust-lang.org/infra/channel-layout.html
-https://forge.rust-lang.org/infra/other-installation-methods.html
+- https://forge.rust-lang.org/infra/channel-layout.html
+- https://forge.rust-lang.org/infra/other-installation-methods.html
 
 * Overview
 
@@ -32,7 +32,7 @@ your ~~/.config/guix/channels.scm~, and call ~guix pull~.
 
 *** For stable Rusts
 #+begin_src shell
-  guix search rust-bin
+  guix search rust-toolchain
 #+end_src
 
 *** For latest nightly/beta
