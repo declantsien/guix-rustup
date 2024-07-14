@@ -370,6 +370,7 @@
      x86_64-rumprun-netbsd
      x86_64-sun-solaris
      x86_64-unknown-cloudabi
+     i686-unknown-redox
      )))
 
 (define (%rustc-target-triplets? triplet)
