@@ -150,11 +150,11 @@
                    channel-str))
   (define _channel-name (channel->name channel))
 
+  (define _channel-date (cadr _data))
   (define version (cond ((equal? _channel-name "nightly")
                          (format #f "~a-~a" (car _data) _channel-date))
                         (else
                          (car _data))))
-  (define _channel-date (cadr _data))
   (define hashed-binaries (cddr _data))
   (define available-components (map car hashed-binaries))
   (define (component-available? component)
