@@ -581,6 +581,7 @@
                            (recursive-assoc-ref component '("target")))))))
 
     `(,toolchain-version
+      ,date
       ,@(map
          component-hashed-binaries
          components)))

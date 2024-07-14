@@ -19,6 +19,7 @@
 (define-module (rustup build toolchain)
   #:use-module (rnrs enums)
   #:use-module (guix http-client)
+  #:use-module (rustup packages)
   #:use-module (web uri)
   #:use-module (guix utils)
   #:use-module (guix records)
@@ -133,24 +134,10 @@
             (G_ "targets should be a list, was given: ~a")
             targets)))
   (for-each %rustc-target-triplets? targets)
-  (define alias (find (lambda (alias)
-                        (string= (channel-str-normalize channel-str) (symbol->string (car alias))))
-                      (module-ref (resolve-module '(rustup dist)) 'aliases)))
-  (define aliased-str (cond (alias
-                             (symbol->string (cdr alias)))
-                            (else
-                             channel-str)))
-  (define channel (channel->from-str
-                   aliased-str))
-  (define _channel-name (channel->name channel))
-  (define _channel-date (channel->date channel))
-  (define _var (if _channel-date
-                   (module-variable
-                    (resolve-module `(rustup dist ,(string->symbol _channel-date)))
-                    (string->symbol (channel-str-normalize _channel-name)))
-                   #f))
-  (define _data (cond (_var
-                       (variable-ref _var))
+  (define manifest-file (search-manifest channel-str))
+
+  (define _data (cond (manifest-file
+                       (call-with-input-file manifest-file read))
                       (else
                        (download-and-compact-manifest channel-str))))
 
@@ -159,11 +146,16 @@
             (G_ "Toolchain not avaiable, was given: ~a")
             channel-str)))
 
+  (define channel (channel->from-str
+                   channel-str))
+  (define _channel-name (channel->name channel))
+
   (define version (cond ((equal? _channel-name "nightly")
                          (format #f "~a-~a" (car _data) _channel-date))
                         (else
                          (car _data))))
-  (define hashed-binaries (cdr _data))
+  (define _channel-date (cadr _data))
+  (define hashed-binaries (cddr _data))
   (define available-components (map car hashed-binaries))
   (define (component-available? component)
     (unless (member (%toolchain-components->position component) available-components)
