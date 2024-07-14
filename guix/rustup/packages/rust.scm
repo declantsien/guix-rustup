@@ -464,7 +464,10 @@
 (define-public rust-bin-1.78.0
   (deprecated-package "rust-bin" rust-toolchain-1.78.0))
 
-(define-public rust-toolchain rust-toolchain-1.78.0)
+(define-public rust-toolchain-1.79.0
+  (rustup "1.79.0"))
+
+(define-public rust-toolchain rust-toolchain-1.79.0)
 
 (define-public rust-bin
   (deprecated-package "rust-bin" rust-toolchain))
