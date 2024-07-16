@@ -229,6 +229,9 @@
            `(,rust-std-component-index ,@source))
          cross-sources))))
 
+  (when (null? all-sources)
+    (error "Channel is too old, try to add 'rust to args components"))
+
   (define hashed-binary-urls (map (lambda (source)
          (apply hashed-binary-url
                 (append source

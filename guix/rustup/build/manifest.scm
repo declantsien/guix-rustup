@@ -373,6 +373,7 @@
      x86_64-sun-solaris
      x86_64-unknown-cloudabi
      i686-unknown-redox
+     wasm32-unknown-wasi
      )))
 
 (define (%rustc-target-triplets? triplet)
@@ -595,13 +596,25 @@
     (compact-manifest manifest)))
 
 (define* (validate-url-pattern component-name-index triplet-index compression-kind-index hash uri-triplet-index channel-name date url)
+  (define (uri-path url)
+    (if (string=? url "")
+        #f
+        (if (string-contains url "cargo-dist/")
+            (substring url (string-contains url "cargo-dist/"))
+            (substring url (string-contains url "dist/")))))
+
   (let* ((constructed (car (hashed-binary-url component-name-index triplet-index compression-kind-index hash uri-triplet-index channel-name date %default-rustup-dist-root)))
          (matches (string= constructed url)))
     (if (not matches)
-        (error (format #f "failed to constructed url: ~%provided   :~a~%constructed:~a~%~a~%" url constructed `(
-                                                                                                                ,component-name-index
-                                                                                                                ,compression-kind-index
-                                                                                                                ,hash)))
+        ;;   (error (format #f "failed to constructed url: ~%provided   :~a~%constructed:~a~%~a~%" url constructed `(
+        ;;                                                                                                          ,component-name-index
+        ;;                                                                                                          ,compression-kind-index
+        ;;                                                                                                          ,hash)))
+        `(
+          ,triplet-index
+          ,compression-kind-index
+          ,hash
+          ,(uri-path url))
         `(
           ,triplet-index
           ,compression-kind-index
@@ -615,8 +628,13 @@
                        (enum-set->list %rustc-target-triplets))))
     (and triplet (%rustc-target-triplets->position triplet))))
 
-(define* (hashed-binary-url component-name-index triplet-index compression-kind-index hash uri-triplet-index channel-name date dist-root )
-  (let* ((name (%toolchain-components->get component-name-index))
+;; uri-triplet-index url from rustup dist server sometimes using same url for different targets
+;; for url from old rust version which can't be constructed using this procedure. we just save the
+;; the url segment after 'dist/' in the same slot as uri-triplet-index but as string
+(define* (hashed-binary-url component-name-index triplet-index compression-kind-index hash uri-triplet-index channel-name date dist-root)
+  (if (string? uri-triplet-index)
+      `(,(format #f "~a/~a" %rustup-dist-server uri-triplet-index) . ,hash)
+      (let* ((name (%toolchain-components->get component-name-index))
          (suffix (%compression-kind->file-suffix
                   (%compression-kind->get
                    compression-kind-index)))
@@ -626,7 +644,7 @@
                   (format #f "~a/~a/~a-~a-~a.tar~a" dist-root date name channel-name target suffix)))
 
          )
-    `(,url . ,hash)))
+    `(,url . ,hash))))
 
 (define* (write-manifest data manifests-dir
                          #:optional (no-update-default-channel #t))
