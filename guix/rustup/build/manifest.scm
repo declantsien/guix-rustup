@@ -120,6 +120,8 @@
     ((zstd)
      ".zst")))
 
+;; Warning: When adding a new rustc target, try to append them to
+;; the end of the list.
 (define %rustc-target-triplets
   (make-enumeration
    '(all
@@ -374,6 +376,7 @@
      x86_64-unknown-cloudabi
      i686-unknown-redox
      wasm32-unknown-wasi
+     arm64e-apple-tvos
      )))
 
 (define (%rustc-target-triplets? triplet)
