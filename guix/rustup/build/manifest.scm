@@ -168,6 +168,7 @@
      arm64_32-apple-watchos
      arm64e-apple-darwin
      arm64e-apple-ios
+     arm64e-apple-tvos
      arm64ec-pc-windows-msvc
      armeb-unknown-linux-gnueabi
      armebv7r-none-eabi
