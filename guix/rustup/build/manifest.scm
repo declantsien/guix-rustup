@@ -377,6 +377,7 @@
      i686-unknown-redox
      wasm32-unknown-wasi
      arm64e-apple-tvos
+     wasm32v1-none
      )))
 
 (define (%rustc-target-triplets? triplet)
