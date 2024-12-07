@@ -35,6 +35,6 @@ jobs:
       - name: Build
         run: guix build rust-bin
       - name: Build
-        run: guix build -e '((@@ (rustup build toolchain) rustup) "1.78.0")'
+        run: guix build -e '((@@ (rustup build toolchain) rustup) "stable")'
       - name: Build
-        run: guix build -e '((@@ (rustup build toolchain) rustup) "nightly-2024-05-13")'
+        run: guix build -e '((@@ (rustup build toolchain) rustup) "nightly")'
