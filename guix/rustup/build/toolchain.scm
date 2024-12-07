@@ -230,7 +230,9 @@
          cross-sources))))
 
   (when (null? all-sources)
-    (error "Channel is too old, try to add 'rust to args components"))
+    (raise (formatted-message
+            (G_ "Channel is too old, try to add 'rust to args components, was given: ~a")
+            channel-str)))
 
   (define hashed-binary-urls (map (lambda (source)
          (apply hashed-binary-url
