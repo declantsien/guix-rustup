@@ -337,12 +337,19 @@
               (lambda* (#:key inputs #:allow-other-keys)
 		(for-each
 		 (lambda (input)
-		   (let* ((name (car input)))
-		     (when (equal? name "_")
-		       (let ((source (cdr input)))
-			 ;; (format #t "source : ~a ...~%" source)
-			 (invoke "tar" "-xvf" source)))
-		     ))
+		   (let* ((source (cdr input)))
+                     ;; copied from gnu-build-system unpack
+                     (cond
+                      ((string-suffix? ".zip" source)
+                       (invoke "unzip" source))
+                      ((tarball? source)
+                       (invoke "tar" "xvf" source))
+                      (else
+                       (let ((name (strip-store-file-name source))
+                             (command (compressor source)))
+                         ;; (copy-file source name)
+                         (when command
+                           (invoke command "--decompress" name)))))))
                  inputs)
 		))
 	    (delete 'patchelf)
