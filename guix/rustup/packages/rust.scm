@@ -479,7 +479,10 @@
 (define-public rust-toolchain-1.83.0
   (rustup "1.83.0"))
 
-(define-public rust-toolchain rust-toolchain-1.83.0)
+(define-public rust-toolchain-1.84.0
+  (rustup "1.84.0"))
+
+(define-public rust-toolchain rust-toolchain-1.84.0)
 
 (define-public rust-bin
   (deprecated-package "rust-bin" rust-toolchain))
