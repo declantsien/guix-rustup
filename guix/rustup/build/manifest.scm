@@ -378,6 +378,9 @@
      wasm32-unknown-wasi
      arm64e-apple-tvos
      wasm32v1-none
+     m68k-unknown-none-elf
+     mips-mti-none-elf
+     mipsel-mti-none-elf
      )))
 
 (define (%rustc-target-triplets? triplet)
