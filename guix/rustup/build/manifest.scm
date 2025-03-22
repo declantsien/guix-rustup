@@ -381,6 +381,8 @@
      m68k-unknown-none-elf
      mips-mti-none-elf
      mipsel-mti-none-elf
+     amdgcn-amd-amdhsa
+     i586-unknown-redox
      )))
 
 (define (%rustc-target-triplets? triplet)
