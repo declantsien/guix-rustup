@@ -383,6 +383,8 @@
      mipsel-mti-none-elf
      amdgcn-amd-amdhsa
      i586-unknown-redox
+     loongarch32-unknown-none
+     loongarch32-unknown-none-softfloat
      )))
 
 (define (%rustc-target-triplets? triplet)
