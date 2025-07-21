@@ -3,6 +3,8 @@
   #:use-module (rustup build manifest)
   #:use-module (guix ui))
 
+;; Requirements:
+;; guix shell guile guile-gcrypt guile-gnutls
 ;; Usage:
 ;; guile update.scm stable
 ;; guile update.scm 1.79.0
