@@ -385,6 +385,9 @@
      i586-unknown-redox
      loongarch32-unknown-none
      loongarch32-unknown-none-softfloat
+     aarch64-unknown-managarm-mlibc
+     riscv64gc-unknown-managarm-mlibc
+     x86_64-unknown-managarm-mlibc
      )))
 
 (define (%rustc-target-triplets? triplet)
