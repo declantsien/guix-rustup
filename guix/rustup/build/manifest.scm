@@ -291,6 +291,7 @@
      riscv32imc-esp-espidf
      riscv32imc-unknown-none-elf
      riscv64-linux-android
+     riscv64a23-unknown-linux-gnu
      riscv64gc-unknown-freebsd
      riscv64gc-unknown-fuchsia
      riscv64gc-unknown-hermit
