@@ -388,6 +388,13 @@
      aarch64-unknown-managarm-mlibc
      riscv64gc-unknown-managarm-mlibc
      x86_64-unknown-managarm-mlibc
+     riscv64a23-unknown-linux-gnu
+     thumbv7a-none-eabi
+     thumbv7a-none-eabihf
+     thumbv7r-none-eabi
+     thumbv7r-none-eabihf
+     thumbv8r-none-eabihf
+     x86_64-unknown-linux-gnuasan
      )))
 
 (define (%rustc-target-triplets? triplet)
@@ -410,6 +417,8 @@
           (equal? (%rustc-target-triplets->position target) index))
         (enum-set->list %rustc-target-triplets)))
 
+;; When adding a new components, suffix `-preview` should be removed
+;; Refer to `%toolchain-components->position`
 (define %toolchain-components
   (make-enumeration
    '(cargo
@@ -433,7 +442,10 @@
      rustc-docs
      rustfmt
 
-     lldb)))
+     lldb
+     gcc-x86_64-unknown-linux-gnu
+     rustc-codegen-gcc
+     )))
 
 (define (%toolchain-components? component)
   (unless (enum-set-member?
