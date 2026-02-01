@@ -3,7 +3,7 @@
 (channel
  (version 0)
  (directory "guix")
- (url "https://github.com/declantsien/guix-rustup")
+ (url "https://codeberg.org/declantsien/guix-rustup")
  (news-file "NEWS")
  (dependencies
   (channel

@@ -19,7 +19,7 @@ your ~~/.config/guix/channels.scm~, and call ~guix pull~.
   (cons*
    (channel
     (name 'rustup)
-    (url "https://github.com/declantsien/guix-rustup")
+    (url "https://codeberg.org/declantsien/guix-rustup")
     (introduction
      (make-channel-introduction
       "325d3e2859d482c16da21eb07f2c6ff9c6c72a80"
