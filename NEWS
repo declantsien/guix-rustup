@@ -1,0 +1,5 @@
+(channel-news
+ (version 0)
+ (entry (commit "3a4c867f36de6fb957a5b0f4749db30eb4edc336")
+        (title (en "@rust-bin has be deprecated and removed"))
+              (body (en "@rust-bin has be deprecated and removed! Plz use @rust-toolchain instead."))))

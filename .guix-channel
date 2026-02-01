@@ -4,6 +4,7 @@
  (version 0)
  (directory "guix")
  (url "https://github.com/declantsien/guix-rustup")
+ (news-file "NEWS")
  (dependencies
   (channel
    (name nonguix)
