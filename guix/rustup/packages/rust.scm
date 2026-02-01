@@ -506,7 +506,16 @@
 (define-public rust-toolchain-1.91.0
   (rustup "1.91.0"))
 
-(define-public rust-toolchain rust-toolchain-1.91.0)
+(define-public rust-toolchain-1.91.1
+  (rustup "1.91.1"))
+
+(define-public rust-toolchain-1.92.0
+  (rustup "1.92.0"))
+
+(define-public rust-toolchain-1.93.0
+  (rustup "1.93.0"))
+
+(define-public rust-toolchain rust-toolchain-1.93.0)
 
 (define-public rust-bin
   (deprecated-package "rust-bin" rust-toolchain))
