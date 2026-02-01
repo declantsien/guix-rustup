@@ -33,7 +33,7 @@ jobs:
                      (openpgp-fingerprint
                       "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
       - name: Build
-        run: guix build rust-bin
+        run: guix build rust-toolchain
       - name: Build
         run: guix build -e '((@@ (rustup build toolchain) rustup) "stable")'
       - name: Build
