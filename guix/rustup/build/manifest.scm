@@ -395,6 +395,7 @@
      thumbv7r-none-eabihf
      thumbv8r-none-eabihf
      x86_64-unknown-linux-gnuasan
+     s390x-unknown-none-softfloat
      )))
 
 (define (%rustc-target-triplets? triplet)
