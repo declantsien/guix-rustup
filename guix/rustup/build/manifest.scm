@@ -588,9 +588,7 @@
         (define uri-triplet-index (and uri (strip-uri-target-triplet-index uri)))
         (define triplet-index (%rustc-target-triplets->position (car target)))
 
-        (unless triplet-index
-          (error "Invalid triplet :" (car target)))
-        (if hash
+        (if (and hash triplet-index)
             (validate-url-pattern
              component-name-index
              triplet-index
